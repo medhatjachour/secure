@@ -1,1 +1,0 @@
-to convert resources.qrc to pythton -> pyrcc5 .\resources.qrc -o resources_rc.py
