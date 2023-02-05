@@ -1,0 +1,224 @@
+{
+	"QMainWindow":[
+		{
+			"tittle":"SecureVision",
+			"icon":"",
+			"frameless": true,
+			"transluscentBg": true,
+			"sizeGrip": "sizeGrip",
+			"navigation":[
+				{
+					"minimize":"minimizeBtn",
+					"close": "closeBtn",
+					"restore":[
+						{	
+							"buttonName": "restoreBtn",
+							"normalIcon": ":/icons/Icons/square.svg",
+							"maximizedIcon": ":/icons/Icons/copy.svg"
+						}
+					],
+					"moveWindow":"headerContainer",
+					"tittleBar": "headerContainer"
+				}
+			]
+		}
+	],
+    "QCustomSlideMenu": [
+        {
+            "name": "leftMenuContainer",
+            "defaultSize": [{
+                "width": 60,
+                "height": "parent"
+            }],
+            "collapsedSize": [{
+                "width": 60,
+                "height": "parent"
+            }],
+            "expandedSize": [{
+                "width": 150,
+                "height": "parent"
+            }],
+            "toggleButton": [{
+                "buttonName": "menuButton",
+                "icons": [{
+                    "whenMenuIsCollapsed": ":/icons/Icons/align-justify.svg",
+                    "whenMenuIsExpanded": ":/icons/Icons/chevrons-left.svg"
+                }]
+            }],
+            "menuTransitionAnimation": [{
+                "animationDuration": 500,
+                "animationEasingCurve": "Linear"
+            }]
+        },
+        {
+            "name": "centerMenuContainer",
+            "defaultSize": [{
+                "width": 0,
+                "height": "parent"
+            }],
+            "collapsedSize": [{
+                "width": 0,
+                "height": "parent"
+            }],
+            "expandedSize": [{
+                "width": 200,
+                "height": "parent"
+            }],
+            "menuTransitionAnimation": [{
+                "animationDuration": 500,
+                "animationEasingCurve": "Linear"
+            }]
+        },
+        {
+            "name": "rightMenuContainer",
+            "defaultSize": [{
+                "width": 300,
+                "height": "parent"
+            }],
+            "collapsedSize": [{
+                "width": 0,
+                "height": "parent"
+            }],
+            "expandedSize": [{
+                "width": 300,
+                "height": "parent"
+            }],
+            "toggleButton": [{
+                "buttonName": "expandCamSettings",
+                "icons": [{
+                    "whenMenuIsCollapsed": ":/icons/Icons/chevrons-left.svg",
+                    "whenMenuIsExpanded": ":/icons/Icons/chevrons-right.svg"
+                }]
+            }],
+            "menuTransitionAnimation": [{
+                "animationDuration": 500,
+                "animationEasingCurve": "Linear"
+            }]
+        },
+        {
+            "name": "popUpNotificationContainer",
+            "defaultSize": [{
+                "width": 0,
+                "height": "auto"
+            }],
+            "collapsedSize": [{
+                "width": 0,
+                "height": "auto"
+            }],
+            "expandedSize": [{
+                "width": 500,
+                "height": 100
+            }],
+            "menuTransitionAnimation": [{
+                "animationDuration": 500,
+                "animationEasingCurve": "Linear"
+            }],
+            "floatPosition": [
+                {
+                    "relativeTo": "centralwidget",
+                    "position": "center-center",
+                    "shadow":[
+                        {
+                            "color": "#000",
+                            "blurRadius": 20,
+                            "xOffset": 0,
+                            "yOffset": 0
+                        }
+                    ]
+                }
+            ],
+            "toggleButton": [{
+                "buttonName": "notificationBtn"
+            }]
+        }
+    ],
+    "QStackedWidget":[
+		{
+			"name":"mainPages",			
+			"navigation":[
+				{					
+					"navigationButtons":[
+						{
+							"homeBtn": "homePage",
+							"recordsBtn": "savedRecordsPage",
+                            "analyticsBtn": "analyticsPage"
+						}
+					]
+				}
+			]
+	
+		},
+        {
+			"name":"centerMenuPages",			
+			"navigation":[
+				{					
+					"navigationButtons":[
+						{
+							"settingsBtn": "settingsPage",
+							"infoBtn": "informationPage",
+                            "helpBtn": "helpPage"
+						}
+					]
+				}
+			]
+	
+		},
+        {
+			"name":"rightMenuPages",			
+			"navigation":[
+				{					
+					"navigationButtons":[
+						{
+							"detectionSettingsBtn": "objdetectSettingPage",
+                            "cameraSettingsButton": "cameraSettingPage"
+						}
+					]
+				}
+			]
+	
+		}
+	],
+    "QPushButtonGroup": [
+        {
+            "Buttons": [
+                "homeBtn",
+                "recordsBtn",
+                "analyticsBtn"
+            ],
+            "Style":[
+                {
+                    "Active": "background-color: #015371;",
+                    "NotActive": ""
+                }
+            ]
+        },
+        {
+            "Buttons": [
+                "settingsBtn",
+                "infoBtn",
+                "helpBtn"
+            ],
+            "Style":[
+                {
+                    "Active": "background-color: #015371;",
+                    "NotActive": ""
+                }
+            ]
+        },
+        {
+            "Buttons": [
+                "detectionSettingsBtn",
+                "cameraSettingsButton"
+            ],
+            "Style":[
+                {
+                    "Active": "background-color: #015371;",
+                    "NotActive": ""
+                }
+            ]
+        }
+    ]
+}
+
+
+
