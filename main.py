@@ -21,13 +21,17 @@ class MainWindow(QMainWindow):
         self.ui.restoreBtn.clicked.connect(self.restoreFun)
         self.ui.minimizeBtn.clicked.connect(self.minimizeFun)
 
+        self.ui.notificationBtn.clicked.connect(self.notificationFun)
+        self.ui.closeNotificationBtn.clicked.connect(self.closeNotificationFun)
+
         # left
         icon12 = QIcon()
         icon12.addPixmap(QPixmap(":/icons/Icons/chevrons-right.svg"), QIcon.Mode.Normal, QIcon.State.Off)
         self.ui.expandCamSettings.setIcon(icon12)
         self.ui.homeBtn.setStyleSheet(u"background-color: rgb(0, 170, 255);")
-        self.expandRightMenuFun(False)
-        self.expandLeftMenuFun(False)
+        self.ui.popUpNotificationContainer.setVisible(False)
+        # self.expandRightMenuFun(False)
+        # self.expandLeftMenuFun(False)
 
         self.ui.expandCamSettings.clicked.connect(partial( self.expandRightMenuFun, True))
         self.ui.closeRightMenuBtn.clicked.connect(partial( self.expandRightMenuFun, False))
@@ -58,10 +62,16 @@ class MainWindow(QMainWindow):
         self.close()
     def restoreFun(self):
         self.showNormal()
-
-        
     def minimizeFun(self):
         pass
+    
+    def notificationFun(self):
+        self.ui.popUpNotificationContainer.setMaximumSize(420,100)
+        self.ui.popUpNotificationContainer.setMinimumSize(420,100)
+        self.ui.popUpNotificationContainer.move(450 , 420)
+        self.ui.popUpNotificationContainer.setVisible(True)
+    def closeNotificationFun(self):
+        self.ui.popUpNotificationContainer.setVisible(False)
     # window functions
 
     #left
@@ -143,19 +153,25 @@ class MainWindow(QMainWindow):
         minwidth = 60
         maxwidth = 153
         widthExtended = 0
-        self.ui.leftMenuContainer.setMinimumWidth(0)
+        self.ui.leftMenuContainer.setMinimumWidth(minwidth)
         self.ui.leftMenuContainer.setMaximumWidth(1654541)
         width = self.ui.leftMenuContainer.width()
         if width == minwidth:
             widthExtended = 153
+            icon12 = QIcon()
+            icon12.addPixmap(QPixmap(":/icons/Icons/align-justify.svg"), QIcon.Mode.Normal, QIcon.State.Off)
+            self.ui.menuButton.setIcon(icon12)
      
         if width == maxwidth or width == 153:
             widthExtended = minwidth
+            icon12 = QIcon()
+            icon12.addPixmap(QPixmap(":/icons/Icons/chevrons-left.svg"), QIcon.Mode.Normal, QIcon.State.Off)
+            self.ui.menuButton.setIcon(icon12)
       
 
         self.animation = QPropertyAnimation(self.ui.leftMenuContainer, b"maximumWidth")
         self.animation.setEasingCurve(QEasingCurve.InOutQuart)
-        self.animation.setDuration(450)
+        self.animation.setDuration(650)
         self.animation.setStartValue(width)
         self.animation.setEndValue(widthExtended)
         self.animation.start()
