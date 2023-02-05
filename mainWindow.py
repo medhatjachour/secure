@@ -133,8 +133,12 @@ class Ui_MainWindow(object):
         font.setBold(False)
         self.recordsBtn.setFont(font)
         self.recordsBtn.setStyleSheet("")
-        icon = QtGui.QIcon.fromTheme("white")
-        self.recordsBtn.setIcon(icon)
+    
+        icon2 =QtGui.QIcon()
+    
+        icon2.addFile(u":/icons/Icons/database.svg",QtCore.QSize(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        
+        self.recordsBtn.setIcon(icon2)
         self.recordsBtn.setIconSize(QtCore.QSize(24, 24))
         self.recordsBtn.setObjectName("recordsBtn")
         self.verticalLayout_4.addWidget(self.recordsBtn)
@@ -147,6 +151,9 @@ class Ui_MainWindow(object):
         self.analyticsBtn.setStyleSheet("")
         icon = QtGui.QIcon.fromTheme("#fff")
         self.analyticsBtn.setIcon(icon)
+        icon2 =QtGui.QIcon()
+        icon2.addFile(u":/icons/Icons/activity.svg",QtCore.QSize(), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.analyticsBtn.setIcon(icon2)
         self.analyticsBtn.setIconSize(QtCore.QSize(24, 24))
         self.analyticsBtn.setObjectName("analyticsBtn")
         self.verticalLayout_4.addWidget(self.analyticsBtn)
