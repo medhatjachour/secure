@@ -1,4 +1,4 @@
-# Form implementation generated from reading ui file 'ui.ui'
+# Form implementation generated from reading ui file 'V0.1.ui'
 #
 # Created by: PyQt6 UI code generator 6.1.0
 #
@@ -407,6 +407,10 @@ class Ui_MainWindow(object):
         sizePolicy.setHeightForWidth(self.webcamWidget.sizePolicy().hasHeightForWidth())
         self.webcamWidget.setSizePolicy(sizePolicy)
         self.webcamWidget.setObjectName("webcamWidget")
+        self.gridLayout = QtWidgets.QGridLayout(self.webcamWidget)
+        self.gridLayout.setContentsMargins(5, 5, 5, 5)
+        self.gridLayout.setSpacing(2)
+        self.gridLayout.setObjectName("gridLayout")
         self.horizontalLayout_12.addWidget(self.webcamWidget)
         self.expandCamSettings = QtWidgets.QPushButton(self.mainPagesPage1)
         icon12 = QtGui.QIcon()
