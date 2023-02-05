@@ -14,9 +14,13 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.show()        
         self.labels = []
-
-        # window functions 
         
+        self.setWindowFlag(Qt.FramelessWindowHint)
+        # window functions 
+        self.ui.closeBtn.clicked.connect(self.closeFun)
+        self.ui.restoreBtn.clicked.connect(self.restoreFun)
+        self.ui.minimizeBtn.clicked.connect(self.minimizeFun)
+
         # left
         icon12 = QIcon()
         icon12.addPixmap(QPixmap(":/icons/Icons/chevrons-right.svg"), QIcon.Mode.Normal, QIcon.State.Off)
@@ -50,6 +54,14 @@ class MainWindow(QMainWindow):
             if child.widget():
                 child.widget().deleteLater()
 
+    def closeFun(self):
+        self.close()
+    def restoreFun(self):
+        self.showNormal()
+
+        
+    def minimizeFun(self):
+        pass
     # window functions
 
     #left
