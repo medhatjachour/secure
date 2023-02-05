@@ -15,7 +15,17 @@ class MainWindow(QMainWindow):
         self.labels = []
 
         self.ui.screencountCombobox.currentIndexChanged.connect(self.addScreens)
+
+    # main Functions 
+    # ///////////////////////////////////////////////// clearing taps
+    def clear_tab(self, layout):
+        while layout.count():
+            child = layout.takeAt(0)
+            if child.widget():
+                child.widget().deleteLater()
+
     def addScreens(self):
+        self.clear_tab(self.ui.gridLayout)
         num = self.ui.screencountCombobox.currentIndex()
         print(int(num))
         n = num
