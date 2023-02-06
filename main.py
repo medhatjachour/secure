@@ -33,7 +33,9 @@ class MainWindow(QMainWindow):
         self.ui.popUpNotificationContainer.setVisible(False)
         # self.expandRightMenuFun(False)
         self.ui.leftMenuContainer.setMaximumWidth(65)
-        self.expandLeftMenuFun(False)
+        self.ui.centerMenuContainer.setMinimumWidth(0)
+        self.ui.centerMenuContainer.setMaximumWidth(0)
+        # self.expandLeftMenuFun(False)
 
         self.ui.expandCamSettings.clicked.connect(partial( self.expandRightMenuFun, True))
         self.ui.closeRightMenuBtn.clicked.connect(partial( self.expandRightMenuFun, False))
