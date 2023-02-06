@@ -15,16 +15,15 @@ class MainWindow(QMainWindow):
         self.show()        
         self.labels = []
         
-        # self.setWindowFlag(Qt.FramelessWindowHint)
-        # window functions 
-        self.ui.verticalLayout_11.removeWidget(self.ui.popUpNotificationContainer)
         self.setWindowFlag(Qt.FramelessWindowHint)
         # window functions 
         self.ui.closeBtn.clicked.connect(self.closeFun)
+        self.ui.restoreBtn.clicked.connect(self.restoreFun)
+        self.ui.minimizeBtn.clicked.connect(self.minimizeFun)
 
         self.ui.notificationBtn.clicked.connect(self.notificationFun)
         self.ui.closeNotificationBtn.clicked.connect(self.closeNotificationFun)
-        self.ui.verticalLayout_11.removeWidget(self.ui.popUpNotificationContainer)
+
         # left
         icon12 = QIcon()
         icon12.addPixmap(QPixmap(":/icons/Icons/chevrons-right.svg"), QIcon.Mode.Normal, QIcon.State.Off)
@@ -32,8 +31,7 @@ class MainWindow(QMainWindow):
         self.ui.homeBtn.setStyleSheet(u"background-color: rgb(0, 170, 255);")
         self.ui.popUpNotificationContainer.setVisible(False)
         # self.expandRightMenuFun(False)
-        self.ui.leftMenuContainer.setMaximumWidth(65)
-        self.expandLeftMenuFun(False)
+        # self.expandLeftMenuFun(False)
 
         self.ui.expandCamSettings.clicked.connect(partial( self.expandRightMenuFun, True))
         self.ui.closeRightMenuBtn.clicked.connect(partial( self.expandRightMenuFun, False))
@@ -52,29 +50,6 @@ class MainWindow(QMainWindow):
         self.ui.settingsBtn.clicked.connect(self.settingsBtnfun)
         self.ui.infoBtn.clicked.connect(self.infoBtnfun)
         self.ui.helpBtn.clicked.connect(self.helpBtnfun)
-        self.ui.headerContainer.mouseMoveEvent = self.moveWindow
-
-        self.ui.minimizeBtn.clicked.connect(self.showMinimized)
-        
-        self.ui.restoreBtn.clicked.connect(self.toggleFullScreen)
-  
-    def showMinimized(self) -> None:
-        return super().showMinimized()
-    def toggleFullScreen(self):  
-        isullScreen = bool(self.windowState() == Qt.WindowFullScreen)
-        if isullScreen:
-            self.showNormal()
-        else:
-            self.showFullScreen()    
-    def mousePressEvent(self, event):
-        self.dragPos = event.globalPosition().toPoint()
-    def moveWindow(self,event):
-        self.move(self.pos() + event.globalPosition().toPoint() - self.dragPos )
-        self.dragPos = event.globalPosition().toPoint()
-        event.accept()
-    def closeFun(self):
-        self.close()
-        
     # main Functions 
     # ///////////////////////////////////////////////// clearing taps
     def clear_tab(self, layout):
@@ -83,11 +58,17 @@ class MainWindow(QMainWindow):
             if child.widget():
                 child.widget().deleteLater()
 
+    def closeFun(self):
+        self.close()
+    def restoreFun(self):
+        self.showNormal()
+    def minimizeFun(self):
+        pass
+    
     def notificationFun(self):
-        print(self.width())
         self.ui.popUpNotificationContainer.setMaximumSize(420,100)
         self.ui.popUpNotificationContainer.setMinimumSize(420,100)
-        self.ui.popUpNotificationContainer.move(self.width()/3 , self.height()/2.4)
+        self.ui.popUpNotificationContainer.move(450 , 420)
         self.ui.popUpNotificationContainer.setVisible(True)
     def closeNotificationFun(self):
         self.ui.popUpNotificationContainer.setVisible(False)
@@ -231,7 +212,6 @@ class MainWindow(QMainWindow):
         self.ui.settingsBtn.setStyleSheet(u"background-color:transparent;")
         self.expandLeftMenuFun( True)
         self.ui.centerMenuPages.setCurrentIndex(2) 
-
 
 
 if __name__ == "__main__":
