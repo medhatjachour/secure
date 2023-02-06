@@ -17,6 +17,10 @@ class MainWindow(QMainWindow):
         
         # self.setWindowFlag(Qt.FramelessWindowHint)
         # window functions 
+        self.ui.verticalLayout_11.removeWidget(self.ui.popUpNotificationContainer)
+        self.setWindowFlag(Qt.FramelessWindowHint)
+        # window functions 
+        self.ui.closeBtn.clicked.connect(self.closeFun)
 
         self.ui.notificationBtn.clicked.connect(self.notificationFun)
         self.ui.closeNotificationBtn.clicked.connect(self.closeNotificationFun)
@@ -48,6 +52,29 @@ class MainWindow(QMainWindow):
         self.ui.settingsBtn.clicked.connect(self.settingsBtnfun)
         self.ui.infoBtn.clicked.connect(self.infoBtnfun)
         self.ui.helpBtn.clicked.connect(self.helpBtnfun)
+        self.ui.headerContainer.mouseMoveEvent = self.moveWindow
+
+        self.ui.minimizeBtn.clicked.connect(self.showMinimized)
+        
+        self.ui.restoreBtn.clicked.connect(self.toggleFullScreen)
+  
+    def showMinimized(self) -> None:
+        return super().showMinimized()
+    def toggleFullScreen(self):  
+        isullScreen = bool(self.windowState() == Qt.WindowFullScreen)
+        if isullScreen:
+            self.showNormal()
+        else:
+            self.showFullScreen()    
+    def mousePressEvent(self, event):
+        self.dragPos = event.globalPosition().toPoint()
+    def moveWindow(self,event):
+        self.move(self.pos() + event.globalPosition().toPoint() - self.dragPos )
+        self.dragPos = event.globalPosition().toPoint()
+        event.accept()
+    def closeFun(self):
+        self.close()
+        
     # main Functions 
     # ///////////////////////////////////////////////// clearing taps
     def clear_tab(self, layout):
@@ -204,6 +231,7 @@ class MainWindow(QMainWindow):
         self.ui.settingsBtn.setStyleSheet(u"background-color:transparent;")
         self.expandLeftMenuFun( True)
         self.ui.centerMenuPages.setCurrentIndex(2) 
+
 
 
 if __name__ == "__main__":
