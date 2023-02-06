@@ -15,11 +15,8 @@ class MainWindow(QMainWindow):
         self.show()        
         self.labels = []
         
-        self.setWindowFlag(Qt.FramelessWindowHint)
+        # self.setWindowFlag(Qt.FramelessWindowHint)
         # window functions 
-        self.ui.closeBtn.clicked.connect(self.closeFun)
-        self.ui.restoreBtn.clicked.connect(self.restoreFun)
-        self.ui.minimizeBtn.clicked.connect(self.minimizeFun)
 
         self.ui.notificationBtn.clicked.connect(self.notificationFun)
         self.ui.closeNotificationBtn.clicked.connect(self.closeNotificationFun)
@@ -31,7 +28,8 @@ class MainWindow(QMainWindow):
         self.ui.homeBtn.setStyleSheet(u"background-color: rgb(0, 170, 255);")
         self.ui.popUpNotificationContainer.setVisible(False)
         # self.expandRightMenuFun(False)
-        # self.expandLeftMenuFun(False)
+        self.ui.leftMenuContainer.setMaximumWidth(65)
+        self.expandLeftMenuFun(False)
 
         self.ui.expandCamSettings.clicked.connect(partial( self.expandRightMenuFun, True))
         self.ui.closeRightMenuBtn.clicked.connect(partial( self.expandRightMenuFun, False))
@@ -58,17 +56,11 @@ class MainWindow(QMainWindow):
             if child.widget():
                 child.widget().deleteLater()
 
-    def closeFun(self):
-        self.close()
-    def restoreFun(self):
-        self.showNormal()
-    def minimizeFun(self):
-        pass
-    
     def notificationFun(self):
+        print(self.width())
         self.ui.popUpNotificationContainer.setMaximumSize(420,100)
         self.ui.popUpNotificationContainer.setMinimumSize(420,100)
-        self.ui.popUpNotificationContainer.move(450 , 420)
+        self.ui.popUpNotificationContainer.move(self.width()/3 , self.height()/2.4)
         self.ui.popUpNotificationContainer.setVisible(True)
     def closeNotificationFun(self):
         self.ui.popUpNotificationContainer.setVisible(False)
