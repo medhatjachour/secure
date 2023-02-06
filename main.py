@@ -1,12 +1,76 @@
 # lip 
 import sys
+import cv2
 import math
 from functools import partial
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel
-from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve
-from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QThread, pyqtSignal
+from PySide6.QtGui import QIcon, QPixmap, QImage
 # widgets
 from mainWindow import Ui_MainWindow
+
+
+
+class CaptureIpCameraFramesWorker(QThread):
+    # Signal emitted when a new image or a new frame is ready.
+    ImageUpdated = pyqtSignal(QImage)
+
+    def __init__(self, url) -> None:
+        super(CaptureIpCameraFramesWorker, self).__init__()
+        # Declare and initialize instance variables.
+        self.url = url
+        self.__thread_active = True
+        self.fps = 0
+        self.__thread_pause = False
+
+    def run(self) -> None:
+        # Capture video from a network stream.
+        cap = cv2.VideoCapture(self.url, cv2.CAP_FFMPEG)
+        # Get default video FPS.
+        self.fps = cap.get(cv2.CAP_PROP_FPS)
+        print(self.fps)
+        # If video capturing has been initialized already.q
+        if cap.isOpened():
+            # While the thread is active.
+            while self.__thread_active:
+                #
+                if not self.__thread_pause:
+                    # Grabs, decodes and returns the next video frame.
+                    ret, frame = cap.read()
+                    # If frame is read correctly.
+                    if ret:
+                        # Get the frame height, width and channels.
+                        height, width, channels = frame.shape
+                        # Calculate the number of bytes per line.
+                        bytes_per_line = width * channels
+                        # Convert image from BGR (cv2 default color format) to RGB (Qt default color format).
+                        cv_rgb_image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+                        # Convert the image to Qt format.
+                        qt_rgb_image = QImage(cv_rgb_image.data, width, height, bytes_per_line, QImage.Format_RGB888)
+                        # Scale the image.
+                        # NOTE: consider removing the flag Qt.KeepAspectRatio as it will crash Python on older Windows machines
+                        # If this is the case, call instead: qt_rgb_image.scaled(1280, 720) 
+                        qt_rgb_image_scaled = qt_rgb_image.scaled(1280, 720, Qt.KeepAspectRatio)  # 720p
+                        # qt_rgb_image_scaled = qt_rgb_image.scaled(1920, 1080, Qt.KeepAspectRatio)
+                        # Emit this signal to notify that a new image or frame is available.
+                        self.ImageUpdated.emit(qt_rgb_image_scaled)
+                    else:
+                        break
+        # When everything done, release the video capture object.
+        cap.release()
+        # Tells the thread's event loop to exit with return code 0 (success).
+        self.quit()
+
+    def stop(self) -> None:
+        self.__thread_active = False
+
+    def pause(self) -> None:
+        self.__thread_pause = True
+
+    def unpause(self) -> None:
+        self.__thread_pause = False
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
