@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
 
         self.ui.notificationBtn.clicked.connect(self.notificationFun)
         self.ui.closeNotificationBtn.clicked.connect(self.closeNotificationFun)
-
+        self.ui.verticalLayout_11.removeWidget(self.ui.popUpNotificationContainer)
         # left
         icon12 = QIcon()
         icon12.addPixmap(QPixmap(":/icons/Icons/chevrons-right.svg"), QIcon.Mode.Normal, QIcon.State.Off)
