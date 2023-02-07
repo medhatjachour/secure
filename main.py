@@ -22,7 +22,7 @@ class MainWindow(QMainWindow):
         
         self.doneQuiting = False
 
-        
+
         # self.setWindowFlag(Qt.FramelessWindowHint)
         # window functions 
         self.ui.verticalLayout_11.removeWidget(self.ui.popUpNotificationContainer)
@@ -71,6 +71,7 @@ class MainWindow(QMainWindow):
     # update Images 
     def imageUpdateSlot(self, image): 
         self.threadIsActive = True
+        self.worker.restart()
         for i in self.labels:
             i.setPixmap(QPixmap.fromImage(image))
     def cancelImage(self):
@@ -274,7 +275,9 @@ class cameraWorker(QThread):
                 self.imageUpdate.emit(pic)
     def stop(self):
         self.activate = False
-        self.quit()
+    def restart(self):
+        self.activate = True
+        # self.quit()
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
