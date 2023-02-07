@@ -1,10 +1,11 @@
 # lip 
 import sys
 import math
+import cv2
 from functools import partial
 from PySide6.QtWidgets import QApplication, QMainWindow, QLabel
-from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve
-from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve,QThread,Signal
+from PySide6.QtGui import QIcon, QPixmap, QImage
 # widgets
 from mainWindow import Ui_MainWindow
 class MainWindow(QMainWindow):
@@ -14,6 +15,13 @@ class MainWindow(QMainWindow):
         self.ui.setupUi(self)
         self.show()        
         self.labels = []
+        
+
+        # threads = 
+        self.threadIsActive = False
+        
+        self.doneQuiting = False
+
         
         # self.setWindowFlag(Qt.FramelessWindowHint)
         # window functions 
@@ -60,6 +68,14 @@ class MainWindow(QMainWindow):
         
         self.ui.restoreBtn.clicked.connect(self.toggleFullScreen)
   
+    # update Images 
+    def imageUpdateSlot(self, image): 
+        self.threadIsActive = True
+        for i in self.labels:
+            i.setPixmap(QPixmap.fromImage(image))
+    def cancelImage(self):
+        self.worker.stop()
+        self.doneQuiting == True
     def showMinimized(self) -> None:
         return super().showMinimized()
     def toggleFullScreen(self):  
@@ -131,27 +147,36 @@ class MainWindow(QMainWindow):
         self.ui.rightMenuPages.setCurrentIndex(1)
 
     def addScreens(self):
-        self.clear_tab(self.ui.gridLayout)
-        num = self.ui.screencountCombobox.currentIndex()
-        print(int(num))
-        n = num
-        w = 0
-        x = math.pow(n, 1/2)
-        if n > 0:
-            for i in range(int(n)):
-                if (i%int(x)) == 0:
-                    w +=1                
-                print(int(w / 2), (i%int(x)))
-                self.label = QLabel()
-                self.label.setText(str(i))
-                self.label.setObjectName(u"label")
-                self.labels.append(self.label)
-                self.label.setAlignment(Qt.AlignCenter)
-                if (i + 1) == n and (i%int(x)) == 0:
-                    self.ui.gridLayout.addWidget(self.label, int(w), (i%int(x)) , 1, int(x))
-                else:
-                    self.ui.gridLayout.addWidget(self.label, int(w), (i%int(x)),1,1)
+        
+        if self.threadIsActive:
+            self.cancelImage()
+        
+        if self.doneQuiting:
+            self.clear_tab(self.ui.gridLayout)
+        else:
+            num = self.ui.screencountCombobox.currentIndex()
+            print(int(num))
+            n = num
+            w = 0
+            x = math.pow(n, 1/2)
+            if n > 0:
+                for i in range(int(n)):
+                    if (i%int(x)) == 0:
+                        w +=1                
+                    print(int(w / 2), (i%int(x)))
+                    self.label = QLabel()
+                    self.label.setText(str(i))
+                    self.label.setObjectName(u"label")
+                    self.labels.append(self.label)
+                    self.label.setAlignment(Qt.AlignCenter)
+                    if (i + 1) == n and (i%int(x)) == 0:
+                        self.ui.gridLayout.addWidget(self.label, int(w), (i%int(x)) , 1, int(x))
+                    else:
+                        self.ui.gridLayout.addWidget(self.label, int(w), (i%int(x)),1,1)
 
+        self.worker = cameraWorker()
+        self.worker.imageUpdate.connect(self.imageUpdateSlot)
+        self.worker.start()
     #right
     def homeBtnfun(self):
         self.ui.homeBtn.setStyleSheet(u"background-color: rgb(0, 170, 255);")
@@ -234,8 +259,22 @@ class MainWindow(QMainWindow):
         self.expandLeftMenuFun( True)
         self.ui.centerMenuPages.setCurrentIndex(2) 
 
-
-
+class cameraWorker(QThread):
+    imageUpdate = Signal(QImage)
+    def run(self):
+        self.activate = True
+        capturedVid = cv2.VideoCapture(0)
+        while self.activate:
+            returned, aFrame =  capturedVid.read()
+            if returned:
+                Image = cv2.cvtColor(aFrame, cv2.COLOR_BGR2RGB)
+                flippedImage = cv2.flip(Image, 1)
+                convertToQtFormat = QImage(flippedImage.data, flippedImage.shape[1], flippedImage.shape[0], QImage.Format_RGB888)
+                pic = convertToQtFormat.scaled(640, 480, Qt.KeepAspectRatio)
+                self.imageUpdate.emit(pic)
+    def stop(self):
+        self.activate = False
+        self.quit()
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = MainWindow()
