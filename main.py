@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
         self.cameraViewlabels = {}
         self.availableCameras =[]
         self.combBoxes = {}
-        self.theLabel = 0
+        self.theLabel = []
         # Thread in charge of updating the image
         self.th = Thread(self)
         self.th.finished.connect(self.close)
@@ -70,7 +70,6 @@ class MainWindow(QMainWindow):
         self.ui.minimizeBtn.clicked.connect(self.showMinimized)
         self.ui.restoreBtn.clicked.connect(self.toggleFullScreen)
 
-
     # main Functions 
     # ///////////////////////////////////////////////// Window State
     def showMinimized(self) -> None:
@@ -103,7 +102,6 @@ class MainWindow(QMainWindow):
             child = layout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
-
     def clearSpecificTab(self,layout,i):        
         for i in range(layout.count()):
             if layout.itemAt(i) != layout.itemAt(0):
@@ -155,8 +153,8 @@ class MainWindow(QMainWindow):
     def detectionSettingsBtnfun(self):
         self.ui.rightMenuPages.setCurrentIndex(1)
 
-
     def addScreens(self):
+        self.th.stopp()
         self.clear_tab(self.ui.gridLayout)
         self.clearSpecificTab(self.ui.verticalLayout_20,0)
         self.cameraViewlabels.clear()
@@ -188,22 +186,25 @@ class MainWindow(QMainWindow):
                 self.combBoxes[i] = self.cameraOptionscomboBox 
                 self.cameraOptionscomboBox.currentIndexChanged.connect(self.runWebCam)
 
-        self.verticalSpacer_2 = QSpacerItem(20, 104, QSizePolicy.Minimum,
-                                                      QSizePolicy.Expanding)
+        self.verticalSpacer_2 = QSpacerItem(20, 104, QSizePolicy.Minimum, QSizePolicy.Expanding)
         self.ui.verticalLayout_20.addItem(self.verticalSpacer_2)
 
-                
     @Slot(QImage)
     def runWebCam(self, idx):
         combo = self.sender()
-        self.theLabel  = combo.id_number
+        print(combo.currentText())
+        if combo.currentText() != "" and len(combo.currentText()) >0:
+
+            self.theLabel.append(combo.id_number)
+        else:
+            self.theLabel.remove(combo.id_number) 
         print(f"Selected the variable {idx} from combo {combo.id_number}")
         self.th.start()
 
     @Slot(QImage)
     def setImage(self, image):
         for i in self.cameraViewlabels:
-            if i == self.theLabel:
+            if i in self.theLabel:
                 self.cameraViewlabels[i].setPixmap(QPixmap.fromImage(image))
         # self.cameraViewLabel.setPixmap(QPixmap.fromImage(image))
 
@@ -312,6 +313,8 @@ class Thread(QThread):
             # Emit signal
             self.updateFrame.emit(scaled_img)
         sys.exit(-1)
+    def stopp(self):
+        self.statu = False
 
 
 
