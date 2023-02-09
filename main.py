@@ -2,19 +2,29 @@
 import sys
 import math
 from functools import partial
-from PySide6.QtWidgets import QApplication, QMainWindow, QLabel
-from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve
-from PySide6.QtGui import QIcon, QPixmap
+from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox
+from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QThread, Signal, Slot
+from PySide6.QtGui import QIcon, QPixmap, QImage
+from PySide6.QtMultimedia import QMediaDevices
 # widgets
 from mainWindow import Ui_MainWindow
+import cv2
+
+
 class MainWindow(QMainWindow):
     def __init__(self):
         QMainWindow.__init__(self)
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.show()        
-        self.labels = []
-        
+        self.cameraViewlabels = []
+        self.availableCameras = []
+
+        # Thread in charge of updating the image
+        self.th = Thread(self)
+        self.th.finished.connect(self.close)
+        self.th.updateFrame.connect(self.setImage)
+
         # self.setWindowFlag(Qt.FramelessWindowHint)
         # window functions 
         self.ui.verticalLayout_11.removeWidget(self.ui.popUpNotificationContainer)
@@ -24,7 +34,6 @@ class MainWindow(QMainWindow):
 
         self.ui.notificationBtn.clicked.connect(self.notificationFun)
         self.ui.closeNotificationBtn.clicked.connect(self.closeNotificationFun)
-        self.ui.verticalLayout_11.removeWidget(self.ui.popUpNotificationContainer)
         # left
         icon12 = QIcon()
         icon12.addPixmap(QPixmap(":/icons/Icons/chevrons-right.svg"), QIcon.Mode.Normal, QIcon.State.Off)
@@ -32,7 +41,7 @@ class MainWindow(QMainWindow):
         self.ui.homeBtn.setStyleSheet(u"background-color: rgb(0, 170, 255);")
         self.ui.popUpNotificationContainer.setVisible(False)
         # self.expandRightMenuFun(False)
-        self.ui.leftMenuContainer.setMaximumWidth(65)
+        self.ui.leftMenuContainer.setMaximumWidth(60)
         self.ui.centerMenuContainer.setMinimumWidth(0)
         self.ui.centerMenuContainer.setMaximumWidth(0)
         # self.expandLeftMenuFun(False)
@@ -56,12 +65,17 @@ class MainWindow(QMainWindow):
         self.ui.helpBtn.clicked.connect(self.helpBtnfun)
         self.ui.headerContainer.mouseMoveEvent = self.moveWindow
 
+        #Window state
         self.ui.minimizeBtn.clicked.connect(self.showMinimized)
-        
         self.ui.restoreBtn.clicked.connect(self.toggleFullScreen)
-  
+
+        
+
+    # main Functions 
+    # ///////////////////////////////////////////////// Window State
     def showMinimized(self) -> None:
         return super().showMinimized()
+    
     def toggleFullScreen(self):  
         isullScreen = bool(self.windowState() == Qt.WindowFullScreen)
         if isullScreen:
@@ -76,8 +90,12 @@ class MainWindow(QMainWindow):
         event.accept()
     def closeFun(self):
         self.close()
+
+    def getAvailableCameras(self):
+        cameras = QMediaDevices.videoInputs()
+        for cameraDevice in cameras:
+            self.availableCameras.append(cameraDevice.description())
         
-    # main Functions 
     # ///////////////////////////////////////////////// clearing taps
     def clear_tab(self, layout):
         while layout.count():
@@ -85,8 +103,14 @@ class MainWindow(QMainWindow):
             if child.widget():
                 child.widget().deleteLater()
 
+    def clearSpecificTab(self,layout,i):        
+        for i in range(layout.count()):
+            if layout.itemAt(i) != layout.itemAt(0):
+                layout.itemAt(i).widget().deleteLater()
+
+
     def notificationFun(self):
-        print(self.width())
+        
         self.ui.popUpNotificationContainer.setMaximumSize(420,100)
         self.ui.popUpNotificationContainer.setMinimumSize(420,100)
         self.ui.popUpNotificationContainer.move(self.width()/3 , self.height()/2.4)
@@ -130,10 +154,14 @@ class MainWindow(QMainWindow):
     def detectionSettingsBtnfun(self):
         self.ui.rightMenuPages.setCurrentIndex(1)
 
+
     def addScreens(self):
         self.clear_tab(self.ui.gridLayout)
+        self.clearSpecificTab(self.ui.verticalLayout_20,0)
+        self.cameraViewlabels.clear()
+        self.availableCameras.clear()
         num = self.ui.screencountCombobox.currentIndex()
-        print(int(num))
+        self.getAvailableCameras()
         n = num
         w = 0
         x = math.pow(n, 1/2)
@@ -141,16 +169,34 @@ class MainWindow(QMainWindow):
             for i in range(int(n)):
                 if (i%int(x)) == 0:
                     w +=1                
-                print(int(w / 2), (i%int(x)))
-                self.label = QLabel()
-                self.label.setText(str(i))
-                self.label.setObjectName(u"label")
-                self.labels.append(self.label)
-                self.label.setAlignment(Qt.AlignCenter)
+                self.cameraViewLabel = QLabel()
+                self.cameraViewLabel.setText(str(i))
+                self.cameraViewLabel.setObjectName(u"label")
+                self.cameraViewLabel.setStyleSheet(u"background-color: black;")
+                self.cameraViewlabels.append(self.cameraViewLabel)
+                self.cameraViewLabel.setAlignment(Qt.AlignCenter)
                 if (i + 1) == n and (i%int(x)) == 0:
-                    self.ui.gridLayout.addWidget(self.label, int(w), (i%int(x)) , 1, int(x))
+                    self.ui.gridLayout.addWidget(self.cameraViewLabel, int(w), (i%int(x)) , 1, int(x))
                 else:
-                    self.ui.gridLayout.addWidget(self.label, int(w), (i%int(x)),1,1)
+                    self.ui.gridLayout.addWidget(self.cameraViewLabel, int(w), (i%int(x)),1,1)
+                self.cameraOptionscomboBox = QComboBox(self.ui.cameraComboboxListFrame)
+                self.cameraOptionscomboBox.id_number = i
+                self.cameraOptionscomboBox.setObjectName(u"cameraOptionscomboBox"+str(i))
+                self.ui.verticalLayout_20.addWidget(self.cameraOptionscomboBox, 0, Qt.AlignTop)
+                self.cameraOptionscomboBox.addItems(self.availableCameras)
+                self.cameraOptionscomboBox.currentIndexChanged.connect(self.runWebCam)
+
+
+                
+    @Slot(QImage)
+    def runWebCam(self, idx):
+        combo = self.sender()
+        print(f"Selected the variable {idx} from combo {combo.id_number}")
+        self.th.start()
+
+    @Slot(QImage)
+    def setImage(self, image):
+        self.cameraViewLabel.setPixmap(QPixmap.fromImage(image))
 
     #right
     def homeBtnfun(self):
@@ -233,6 +279,33 @@ class MainWindow(QMainWindow):
         self.ui.settingsBtn.setStyleSheet(u"background-color:transparent;")
         self.expandLeftMenuFun( True)
         self.ui.centerMenuPages.setCurrentIndex(2) 
+
+
+
+
+
+class Thread(QThread):
+    updateFrame = Signal(QImage)
+    def __init__(self, parent=None):
+        QThread.__init__(self, parent)
+        self.status = True
+        self.cap = True
+
+    def run(self):
+        self.cap = cv2.VideoCapture(0)
+        while self.status:
+            ret, frame = self.cap.read()
+            if not ret:
+                continue
+            h, w, ch = frame.shape
+            img = QImage(frame.data, w, h, ch * w, QImage.Format_RGB888)
+            scaled_img = img.scaled(640, 480, Qt.KeepAspectRatio)
+            # Emit signal
+            self.updateFrame.emit(scaled_img)
+        sys.exit(-1)
+
+
+
 
 
 
