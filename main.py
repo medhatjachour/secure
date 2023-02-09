@@ -2,7 +2,7 @@
 import sys
 import math
 from functools import partial
-from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox
+from PySide6.QtWidgets import QApplication, QMainWindow, QLabel, QComboBox, QSpacerItem, QSizePolicy
 from PySide6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QThread, Signal, Slot
 from PySide6.QtGui import QIcon, QPixmap, QImage
 from PySide6.QtMultimedia import QMediaDevices
@@ -17,9 +17,10 @@ class MainWindow(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         self.show()        
-        self.cameraViewlabels = []
-        self.availableCameras = []
-
+        self.cameraViewlabels = {}
+        self.availableCameras =[]
+        self.combBoxes = {}
+        self.theLabel = 0
         # Thread in charge of updating the image
         self.th = Thread(self)
         self.th.finished.connect(self.close)
@@ -69,7 +70,6 @@ class MainWindow(QMainWindow):
         self.ui.minimizeBtn.clicked.connect(self.showMinimized)
         self.ui.restoreBtn.clicked.connect(self.toggleFullScreen)
 
-        
 
     # main Functions 
     # ///////////////////////////////////////////////// Window State
@@ -93,6 +93,7 @@ class MainWindow(QMainWindow):
 
     def getAvailableCameras(self):
         cameras = QMediaDevices.videoInputs()
+        self.availableCameras.append("")
         for cameraDevice in cameras:
             self.availableCameras.append(cameraDevice.description())
         
@@ -173,7 +174,7 @@ class MainWindow(QMainWindow):
                 self.cameraViewLabel.setText(str(i))
                 self.cameraViewLabel.setObjectName(u"label")
                 self.cameraViewLabel.setStyleSheet(u"background-color: black;")
-                self.cameraViewlabels.append(self.cameraViewLabel)
+                self.cameraViewlabels[i] = self.cameraViewLabel
                 self.cameraViewLabel.setAlignment(Qt.AlignCenter)
                 if (i + 1) == n and (i%int(x)) == 0:
                     self.ui.gridLayout.addWidget(self.cameraViewLabel, int(w), (i%int(x)) , 1, int(x))
@@ -184,19 +185,27 @@ class MainWindow(QMainWindow):
                 self.cameraOptionscomboBox.setObjectName(u"cameraOptionscomboBox"+str(i))
                 self.ui.verticalLayout_20.addWidget(self.cameraOptionscomboBox, 0, Qt.AlignTop)
                 self.cameraOptionscomboBox.addItems(self.availableCameras)
+                self.combBoxes[i] = self.cameraOptionscomboBox 
                 self.cameraOptionscomboBox.currentIndexChanged.connect(self.runWebCam)
 
+        self.verticalSpacer_2 = QSpacerItem(20, 104, QSizePolicy.Minimum,
+                                                      QSizePolicy.Expanding)
+        self.ui.verticalLayout_20.addItem(self.verticalSpacer_2)
 
                 
     @Slot(QImage)
     def runWebCam(self, idx):
         combo = self.sender()
+        self.theLabel  = combo.id_number
         print(f"Selected the variable {idx} from combo {combo.id_number}")
         self.th.start()
 
     @Slot(QImage)
     def setImage(self, image):
-        self.cameraViewLabel.setPixmap(QPixmap.fromImage(image))
+        for i in self.cameraViewlabels:
+            if i == self.theLabel:
+                self.cameraViewlabels[i].setPixmap(QPixmap.fromImage(image))
+        # self.cameraViewLabel.setPixmap(QPixmap.fromImage(image))
 
     #right
     def homeBtnfun(self):
