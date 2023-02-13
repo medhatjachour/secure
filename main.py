@@ -21,10 +21,11 @@ class MainWindow(QMainWindow):
         self.availableCameras =[]
         self.combBoxes = {}
         self.theLabel = []
-        # Thread in charge of updating the image
-        self.th = Thread(self)
-        self.th.finished.connect(self.close)
-        self.th.updateFrame.connect(self.setImage)
+        self.threads = {}
+        # # Thread in charge of updating the image
+        # self.th = Thread(self)
+        # self.th.finished.connect(self.close)
+        # self.th.updateFrame.connect(self.setImage)
 
         # self.setWindowFlag(Qt.FramelessWindowHint)
         # window functions 
@@ -92,7 +93,7 @@ class MainWindow(QMainWindow):
 
     def getAvailableCameras(self):
         cameras = QMediaDevices.videoInputs()
-        self.availableCameras.append("")
+        self.availableCameras.append("select camera")
         for cameraDevice in cameras:
             self.availableCameras.append(cameraDevice.description())
         
@@ -154,7 +155,6 @@ class MainWindow(QMainWindow):
         self.ui.rightMenuPages.setCurrentIndex(1)
 
     def addScreens(self):
-        self.th.stopp()
         self.clear_tab(self.ui.gridLayout)
         self.clearSpecificTab(self.ui.verticalLayout_20,0)
         self.cameraViewlabels.clear()
@@ -185,27 +185,38 @@ class MainWindow(QMainWindow):
                 self.cameraOptionscomboBox.addItems(self.availableCameras)
                 self.combBoxes[i] = self.cameraOptionscomboBox 
                 self.cameraOptionscomboBox.currentIndexChanged.connect(self.runWebCam)
+                
+                
+                # self.th.updateFrame.connect(self.setImage)
 
         self.verticalSpacer_2 = QSpacerItem(20, 104, QSizePolicy.Minimum, QSizePolicy.Expanding)
         self.ui.verticalLayout_20.addItem(self.verticalSpacer_2)
 
-    @Slot(QImage)
+    # @Slot(QImage)
     def runWebCam(self, idx):
         combo = self.sender()
-        print(combo.currentText())
-        if combo.currentText() != "" and len(combo.currentText()) >0:
-
+        print(combo.id_number)
+        if combo.id_number > 0 :
+            print(f"idx ==  {idx}")
             self.theLabel.append(combo.id_number)
+            self.threads[combo.id_number] = Thread(idx - 1)
+            self.threads[combo.id_number].updateFrame.connect(self.setImage)
+        elif (combo.id_number == 0):
+            self.threads[combo.id_number].stop()
+            
         else:
             self.theLabel.remove(combo.id_number) 
         print(f"Selected the variable {idx} from combo {combo.id_number}")
-        self.th.start()
+        self.threads[combo.id_number].start()
 
     @Slot(QImage)
     def setImage(self, image):
         for i in self.cameraViewlabels:
             if i in self.theLabel:
                 self.cameraViewlabels[i].setPixmap(QPixmap.fromImage(image))
+            else:
+                pass
+                # self.cameraViewlabels[i].setPixmap(None)
         # self.cameraViewLabel.setPixmap(QPixmap.fromImage(image))
 
     #right
@@ -296,14 +307,17 @@ class MainWindow(QMainWindow):
 
 class Thread(QThread):
     updateFrame = Signal(QImage)
-    def __init__(self, parent=None):
-        QThread.__init__(self, parent)
-        self.status = True
-        self.cap = True
+   
+    def __init__(self, index) -> None:
+        super(Thread, self).__init__()
+       
+        self.index = index
+        self.__thread_active = True
 
     def run(self):
-        self.cap = cv2.VideoCapture(0)
-        while self.status:
+        print(f" index ===  {self.index}")
+        self.cap = cv2.VideoCapture(self.index)
+        while self.__thread_active:
             ret, frame = self.cap.read()
             if not ret:
                 continue
@@ -312,9 +326,10 @@ class Thread(QThread):
             scaled_img = img.scaled(640, 480, Qt.KeepAspectRatio)
             # Emit signal
             self.updateFrame.emit(scaled_img)
-        sys.exit(-1)
-    def stopp(self):
-        self.statu = False
+        # sys.exit(-1)
+    def stop(self):
+        self.__thread_active = False
+        self.quit()
 
 
 
