@@ -103,10 +103,11 @@ class MainWindow(QMainWindow):
             child = layout.takeAt(0)
             if child.widget():
                 child.widget().deleteLater()
-    def clearSpecificTab(self,layout,i):        
-        for i in range(layout.count()):
-            if layout.itemAt(i) != layout.itemAt(0):
-                layout.itemAt(i).widget().deleteLater()
+    def clear_tab_except_first(self, layout):
+        for i in range(layout.count() - 1):
+            child = layout.takeAt(1)
+            if child.widget():
+                child.widget().deleteLater()
 
 
     def notificationFun(self):
@@ -156,7 +157,7 @@ class MainWindow(QMainWindow):
 
     def addScreens(self):
         self.clear_tab(self.ui.gridLayout)
-        self.clearSpecificTab(self.ui.verticalLayout_20,0)
+        self.clear_tab_except_first(self.ui.verticalLayout_20)
         self.cameraViewlabels.clear()
         self.availableCameras.clear()
         num = self.ui.screencountCombobox.currentIndex()
@@ -196,13 +197,14 @@ class MainWindow(QMainWindow):
     def runWebCam(self, idx):
         combo = self.sender()
         print(combo.id_number)
-        if combo.id_number > 0 :
+        if combo.id_number >= 0 :
             print(f"idx ==  {idx}")
             self.theLabel.append(combo.id_number)
             self.threads[combo.id_number] = Thread(idx - 1)
             self.threads[combo.id_number].updateFrame.connect(self.setImage)
         elif (combo.id_number == 0):
-            self.threads[combo.id_number].stop()
+            # self.threads[combo.id_number].stop()
+            pass
             
         else:
             self.theLabel.remove(combo.id_number) 
@@ -315,9 +317,9 @@ class Thread(QThread):
         self.__thread_active = True
 
     def run(self):
-        print(f" index ===  {self.index}")
-        self.cap = cv2.VideoCapture(self.index)
-        while self.__thread_active:
+        if  self.index >= 0:
+            self.cap = cv2.VideoCapture(self.index)
+        while self.__thread_active and self.index >= 0:
             ret, frame = self.cap.read()
             if not ret:
                 continue
@@ -326,6 +328,8 @@ class Thread(QThread):
             scaled_img = img.scaled(640, 480, Qt.KeepAspectRatio)
             # Emit signal
             self.updateFrame.emit(scaled_img)
+            if self.__thread_active == False:
+                break
         # sys.exit(-1)
     def stop(self):
         self.__thread_active = False
