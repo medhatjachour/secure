@@ -196,8 +196,6 @@ class MainWindow(QMainWindow):
     # @Slot(QImage)
     def runWebCam(self, idx):
         combo = self.sender()
-        print("combo.id_number")
-        print(combo.id_number)
         if combo.id_number >= 0 :
             if idx > 0 :
                 print(f"idx ==  {idx}")
@@ -207,18 +205,12 @@ class MainWindow(QMainWindow):
             elif idx == 0:
                 self.threads[combo.id_number].stop()
                 self.theLabel.remove(combo.id_number)
-
-        elif (combo.id_number == 0):
-            # self.threads[combo.id_number].stop()
-            pass
-            
-        else:
-            self.theLabel.remove(combo.id_number) 
         print(f"Selected the variable {idx} from combo {combo.id_number}")
         self.threads[combo.id_number].start()
 
     @Slot(QImage)
     def setImage(self, image):
+        print(combo.id_number)//////////////
         for i in self.cameraViewlabels:
             if i in self.theLabel:
                 self.cameraViewlabels[i].setPixmap(QPixmap.fromImage(image))
