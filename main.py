@@ -206,6 +206,7 @@ class MainWindow(QMainWindow):
                 self.threads[combo.id_number].updateFrame.connect(self.setImage)
             elif idx == 0:
                 self.threads[combo.id_number].stop()
+                self.theLabel.remove(combo.id_number)
 
         elif (combo.id_number == 0):
             # self.threads[combo.id_number].stop()
