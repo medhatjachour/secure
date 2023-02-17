@@ -70,7 +70,7 @@ class MainWindow(QMainWindow):
         #Window state
         self.ui.minimizeBtn.clicked.connect(self.showMinimized)
         self.ui.restoreBtn.clicked.connect(self.toggleFullScreen)
-
+        self.theComb = None
     # main Functions 
     # ///////////////////////////////////////////////// Window State
     def showMinimized(self) -> None:
@@ -199,6 +199,7 @@ class MainWindow(QMainWindow):
         if combo.id_number >= 0 :
             if idx > 0 :
                 print(f"idx ==  {idx}")
+                self.theComb = combo.id_number
                 self.theLabel.append(combo.id_number)
                 self.threads[combo.id_number] = Thread(idx - 1)
                 self.threads[combo.id_number].updateFrame.connect(self.setImage)
@@ -210,10 +211,10 @@ class MainWindow(QMainWindow):
 
     @Slot(QImage)
     def setImage(self, image):
-        print(combo.id_number)//////////////
+        print(self.theComb)
         for i in self.cameraViewlabels:
             if i in self.theLabel:
-                self.cameraViewlabels[i].setPixmap(QPixmap.fromImage(image))
+                self.cameraViewlabels[self.theComb].setPixmap(QPixmap.fromImage(image))
             else:
                 pass
                 # self.cameraViewlabels[i].setPixmap(None)
