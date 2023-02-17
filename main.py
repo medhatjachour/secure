@@ -196,12 +196,17 @@ class MainWindow(QMainWindow):
     # @Slot(QImage)
     def runWebCam(self, idx):
         combo = self.sender()
+        print("combo.id_number")
         print(combo.id_number)
         if combo.id_number >= 0 :
-            print(f"idx ==  {idx}")
-            self.theLabel.append(combo.id_number)
-            self.threads[combo.id_number] = Thread(idx - 1)
-            self.threads[combo.id_number].updateFrame.connect(self.setImage)
+            if idx > 0 :
+                print(f"idx ==  {idx}")
+                self.theLabel.append(combo.id_number)
+                self.threads[combo.id_number] = Thread(idx - 1)
+                self.threads[combo.id_number].updateFrame.connect(self.setImage)
+            elif idx == 0:
+                self.threads[combo.id_number].stop()
+
         elif (combo.id_number == 0):
             # self.threads[combo.id_number].stop()
             pass
