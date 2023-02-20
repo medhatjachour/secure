@@ -71,6 +71,20 @@ class MainWindow(QMainWindow):
         self.ui.minimizeBtn.clicked.connect(self.showMinimized)
         self.ui.restoreBtn.clicked.connect(self.toggleFullScreen)
         self.theComb = None
+
+        self.setImages = {
+            0:self.setImage_0,
+            1:self.setImage_1,
+            2:self.setImage_2,
+            3:self.setImage_3,
+            4:self.setImage_4,
+            5:self.setImage_5,
+            6:self.setImage_6,
+            7:self.setImage_7,
+            8:self.setImage_8,
+            9:self.setImage_9,
+        }
+        self.imageIsRunning = False
     # main Functions 
     # ///////////////////////////////////////////////// Window State
     def showMinimized(self) -> None:
@@ -108,7 +122,6 @@ class MainWindow(QMainWindow):
             child = layout.takeAt(1)
             if child.widget():
                 child.widget().deleteLater()
-
 
     def notificationFun(self):
         
@@ -156,6 +169,7 @@ class MainWindow(QMainWindow):
         self.ui.rightMenuPages.setCurrentIndex(1)
 
     def addScreens(self):
+        # if not self.imageIsRunning
         self.clear_tab(self.ui.gridLayout)
         self.clear_tab_except_first(self.ui.verticalLayout_20)
         self.cameraViewlabels.clear()
@@ -202,21 +216,47 @@ class MainWindow(QMainWindow):
                 self.theComb = combo.id_number
                 self.theLabel.append(combo.id_number)
                 self.threads[combo.id_number] = Thread(idx - 1)
-                self.threads[combo.id_number].updateFrame.connect(self.setImage)
+                self.threads[combo.id_number].updateFrame.connect(self.setImages[combo.id_number])
+                self.threads[combo.id_number].start()
             elif idx == 0:
                 self.threads[combo.id_number].stop()
                 self.theLabel.remove(combo.id_number)
         print(f"Selected the variable {idx} from combo {combo.id_number}")
-        self.threads[combo.id_number].start()
+
+
+
 
     @Slot(QImage)
-    def setImage(self, image):
-        print(self.theComb)
-        for i in self.cameraViewlabels:
-            if i in self.theLabel:
-                self.cameraViewlabels[self.theComb].setPixmap(QPixmap.fromImage(image))
-            else:
-                pass
+    def setImage_0(self, image):
+        self.cameraViewlabels[0].setPixmap(QPixmap.fromImage(image))
+    @Slot(QImage)
+    def setImage_1(self, image):
+        self.cameraViewlabels[1].setPixmap(QPixmap.fromImage(image))
+    @Slot(QImage)
+    def setImage_2(self, image):
+        self.cameraViewlabels[2].setPixmap(QPixmap.fromImage(image))
+    @Slot(QImage)
+    def setImage_3(self, image):
+        self.cameraViewlabels[3].setPixmap(QPixmap.fromImage(image))
+    @Slot(QImage)
+    def setImage_4(self, image):
+        self.cameraViewlabels[4].setPixmap(QPixmap.fromImage(image))
+    @Slot(QImage)
+    def setImage_5(self, image):
+        self.cameraViewlabels[5].setPixmap(QPixmap.fromImage(image))
+    @Slot(QImage)
+    def setImage_6(self, image):
+        self.cameraViewlabels[6].setPixmap(QPixmap.fromImage(image))
+    @Slot(QImage)
+    def setImage_7(self, image):
+        self.cameraViewlabels[7].setPixmap(QPixmap.fromImage(image))
+    @Slot(QImage)
+    def setImage_8(self, image):
+        self.cameraViewlabels[8].setPixmap(QPixmap.fromImage(image))
+    @Slot(QImage)
+    def setImage_9(self, image):
+        self.cameraViewlabels[9].setPixmap(QPixmap.fromImage(image))
+          
                 # self.cameraViewlabels[i].setPixmap(None)
         # self.cameraViewLabel.setPixmap(QPixmap.fromImage(image))
 
