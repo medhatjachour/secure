@@ -202,6 +202,7 @@ class MainWindow(QMainWindow):
                 self.cameraOptionscomboBox.currentIndexChanged.connect(self.runWebCam)
                 
                 
+                
                 # self.th.updateFrame.connect(self.setImage)
 
         self.verticalSpacer_2 = QSpacerItem(20, 104, QSizePolicy.Minimum, QSizePolicy.Expanding)
@@ -210,18 +211,20 @@ class MainWindow(QMainWindow):
     # @Slot(QImage)
     def runWebCam(self, idx):
         combo = self.sender()
+        print(combo.id_number)
         if combo.id_number >= 0 :
             if idx > 0 :
                 print(f"idx ==  {idx}")
                 self.theComb = combo.id_number
                 self.theLabel.append(combo.id_number)
-                self.threads[combo.id_number] = Thread(idx - 1)
+                self.threads[combo.id_number] = Thread(idx - 1, self.cameraViewlabels[combo.id_number].width(), self.cameraViewlabels[combo.id_number].height() )
                 self.threads[combo.id_number].updateFrame.connect(self.setImages[combo.id_number])
                 self.threads[combo.id_number].start()
             elif idx == 0:
                 self.threads[combo.id_number].stop()
+                self.cameraViewlabels[combo.id_number].setStyleSheet(u"background-color: black;")
                 self.theLabel.remove(combo.id_number)
-        print(f"Selected the variable {idx} from combo {combo.id_number}")
+                
 
 
 
@@ -349,10 +352,14 @@ class MainWindow(QMainWindow):
 class Thread(QThread):
     updateFrame = Signal(QImage)
    
-    def __init__(self, index) -> None:
+    def __init__(self, index, width, height) -> None:
         super(Thread, self).__init__()
        
         self.index = index
+        self.width = width
+        self.height = height
+        print(self.height)
+        print(self.width)
         self.__thread_active = True
 
     def run(self):
@@ -363,12 +370,14 @@ class Thread(QThread):
             if not ret:
                 continue
             h, w, ch = frame.shape
-            img = QImage(frame.data, w, h, ch * w, QImage.Format_RGB888)
-            scaled_img = img.scaled(640, 480, Qt.KeepAspectRatio)
+            color_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            img = QImage(color_frame.data, w, h, ch * w, QImage.Format_RGB888)
+            scaled_img = img.scaled(self.width, self.height, Qt.KeepAspectRatio)
             # Emit signal
             self.updateFrame.emit(scaled_img)
             if self.__thread_active == False:
                 break
+        self.cap.release()
         # sys.exit(-1)
     def stop(self):
         self.__thread_active = False
