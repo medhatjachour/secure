@@ -9,7 +9,7 @@ from PySide6.QtMultimedia import QMediaDevices
 # widgets
 from mainWindow import Ui_MainWindow
 import cv2
-
+import time
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -200,34 +200,46 @@ class MainWindow(QMainWindow):
                 self.cameraOptionscomboBox.addItems(self.availableCameras)
                 self.combBoxes[i] = self.cameraOptionscomboBox 
                 self.cameraOptionscomboBox.currentIndexChanged.connect(self.runWebCam)
-                
-                
-                
                 # self.th.updateFrame.connect(self.setImage)
-
         self.verticalSpacer_2 = QSpacerItem(20, 104, QSizePolicy.Minimum, QSizePolicy.Expanding)
         self.ui.verticalLayout_20.addItem(self.verticalSpacer_2)
 
     # @Slot(QImage)
     def runWebCam(self, idx):
         combo = self.sender()
-        print(combo.id_number)
         if combo.id_number >= 0 :
             if idx > 0 :
-                print(f"idx ==  {idx}")
-                self.theComb = combo.id_number
-                self.theLabel.append(combo.id_number)
-                self.threads[combo.id_number] = Thread(idx - 1, self.cameraViewlabels[combo.id_number].width(), self.cameraViewlabels[combo.id_number].height() )
-                self.threads[combo.id_number].updateFrame.connect(self.setImages[combo.id_number])
-                self.threads[combo.id_number].start()
+                print(self.threads.keys())
+                print(combo.id_number)
+                if combo.id_number in self.threads.keys():
+                    self.threads[combo.id_number].stop() 
+                    # self.theLabel.remove(combo.id_number)
+                    print("Thread")
+                    self.theComb = combo.id_number
+         
+ 
+                    # Wait for 5 seconds
+                    time.sleep(1)
+                    # self.theLabel.append(combo.id_number)
+                    self.threads[combo.id_number] = Thread(idx - 1, self.cameraViewlabels[combo.id_number].width(), self.cameraViewlabels[combo.id_number].height() )
+                    self.threads[combo.id_number].updateFrame.connect(self.setImages[combo.id_number])
+                    self.threads[combo.id_number].start()
+
+                else:
+                    self.theComb = combo.id_number
+                    self.theLabel.append(combo.id_number)
+                    self.threads[combo.id_number] = Thread(idx - 1, self.cameraViewlabels[combo.id_number].width(), self.cameraViewlabels[combo.id_number].height() )
+                    self.threads[combo.id_number].updateFrame.connect(self.setImages[combo.id_number])
+                    self.threads[combo.id_number].start()
+            
             elif idx == 0:
                 self.threads[combo.id_number].stop()
+                # Wait for 5 seconds
+                time.sleep(1)
                 self.cameraViewlabels[combo.id_number].setStyleSheet(u"background-color: black;")
+                self.cameraViewlabels[combo.id_number].clear()
                 self.theLabel.remove(combo.id_number)
                 
-
-
-
 
     @Slot(QImage)
     def setImage_0(self, image):
@@ -358,8 +370,8 @@ class Thread(QThread):
         self.index = index
         self.width = width
         self.height = height
-        print(self.height)
-        print(self.width)
+        # print(self.height)
+        # print(self.width)
         self.__thread_active = True
 
     def run(self):
