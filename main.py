@@ -168,7 +168,16 @@ class MainWindow(QMainWindow):
     def detectionSettingsBtnfun(self):
         self.ui.rightMenuPages.setCurrentIndex(1)
 
+
+    def stopAllThreads(self):
+        for i in self.threads.keys():
+            self.threads[i].stop()
+            self.cameraViewlabels[i].clear()
+            self.cameraViewlabels[i].setPixmap(QPixmap())
+        time.sleep(1)
+
     def addScreens(self):
+        self.stopAllThreads()
         # if not self.imageIsRunning
         self.clear_tab(self.ui.gridLayout)
         self.clear_tab_except_first(self.ui.verticalLayout_20)
@@ -214,10 +223,7 @@ class MainWindow(QMainWindow):
                 if combo.id_number in self.threads.keys():
                     self.threads[combo.id_number].stop() 
                     # self.theLabel.remove(combo.id_number)
-                    print("Thread")
                     self.theComb = combo.id_number
-         
- 
                     # Wait for 5 seconds
                     time.sleep(1)
                     # self.theLabel.append(combo.id_number)
@@ -236,8 +242,10 @@ class MainWindow(QMainWindow):
                 self.threads[combo.id_number].stop()
                 # Wait for 5 seconds
                 time.sleep(1)
+                print("removing pixmmap")
                 self.cameraViewlabels[combo.id_number].setStyleSheet(u"background-color: black;")
                 self.cameraViewlabels[combo.id_number].clear()
+                self.cameraViewlabels[combo.id_number].setPixmap(QPixmap())
                 self.theLabel.remove(combo.id_number)
                 
 
