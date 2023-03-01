@@ -175,6 +175,7 @@ class MainWindow(QMainWindow):
             self.cameraViewlabels[i].clear()
             self.cameraViewlabels[i].setPixmap(QPixmap())
         time.sleep(1)
+        self.threads = {}
 
     def addScreens(self):
         self.stopAllThreads()
