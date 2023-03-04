@@ -9,7 +9,7 @@ from PySide6.QtMultimedia import QMediaDevices
 # widgets
 from mainWindow import Ui_MainWindow
 import cv2
-
+import time
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -70,7 +70,21 @@ class MainWindow(QMainWindow):
         #Window state
         self.ui.minimizeBtn.clicked.connect(self.showMinimized)
         self.ui.restoreBtn.clicked.connect(self.toggleFullScreen)
+        self.theComb = None
 
+        self.setImages = {
+            0:self.setImage_0,
+            1:self.setImage_1,
+            2:self.setImage_2,
+            3:self.setImage_3,
+            4:self.setImage_4,
+            5:self.setImage_5,
+            6:self.setImage_6,
+            7:self.setImage_7,
+            8:self.setImage_8,
+            9:self.setImage_9,
+        }
+        self.imageIsRunning = False
     # main Functions 
     # ///////////////////////////////////////////////// Window State
     def showMinimized(self) -> None:
@@ -108,7 +122,6 @@ class MainWindow(QMainWindow):
             child = layout.takeAt(1)
             if child.widget():
                 child.widget().deleteLater()
-
 
     def notificationFun(self):
         
@@ -155,7 +168,18 @@ class MainWindow(QMainWindow):
     def detectionSettingsBtnfun(self):
         self.ui.rightMenuPages.setCurrentIndex(1)
 
+
+    def stopAllThreads(self):
+        for i in self.threads.keys():
+            self.threads[i].stop()
+            self.cameraViewlabels[i].clear()
+            self.cameraViewlabels[i].setPixmap(QPixmap())
+        time.sleep(1)
+        self.threads = {}
+
     def addScreens(self):
+        self.stopAllThreads()
+        # if not self.imageIsRunning
         self.clear_tab(self.ui.gridLayout)
         self.clear_tab_except_first(self.ui.verticalLayout_20)
         self.cameraViewlabels.clear()
@@ -186,38 +210,77 @@ class MainWindow(QMainWindow):
                 self.cameraOptionscomboBox.addItems(self.availableCameras)
                 self.combBoxes[i] = self.cameraOptionscomboBox 
                 self.cameraOptionscomboBox.currentIndexChanged.connect(self.runWebCam)
-                
-                
                 # self.th.updateFrame.connect(self.setImage)
-
         self.verticalSpacer_2 = QSpacerItem(20, 104, QSizePolicy.Minimum, QSizePolicy.Expanding)
         self.ui.verticalLayout_20.addItem(self.verticalSpacer_2)
 
     # @Slot(QImage)
     def runWebCam(self, idx):
         combo = self.sender()
-        print(combo.id_number)
         if combo.id_number >= 0 :
-            print(f"idx ==  {idx}")
-            self.theLabel.append(combo.id_number)
-            self.threads[combo.id_number] = Thread(idx - 1)
-            self.threads[combo.id_number].updateFrame.connect(self.setImage)
-        elif (combo.id_number == 0):
-            # self.threads[combo.id_number].stop()
-            pass
+            if idx > 0 :
+                print(self.threads.keys())
+                print(combo.id_number)
+                if combo.id_number in self.threads.keys():
+                    self.threads[combo.id_number].stop() 
+                    # self.theLabel.remove(combo.id_number)
+                    self.theComb = combo.id_number
+                    # Wait for 5 seconds
+                    time.sleep(1)
+                    # self.theLabel.append(combo.id_number)
+                    self.threads[combo.id_number] = Thread(idx - 1, self.cameraViewlabels[combo.id_number].width(), self.cameraViewlabels[combo.id_number].height() )
+                    self.threads[combo.id_number].updateFrame.connect(self.setImages[combo.id_number])
+                    self.threads[combo.id_number].start()
+
+                else:
+                    self.theComb = combo.id_number
+                    self.theLabel.append(combo.id_number)
+                    self.threads[combo.id_number] = Thread(idx - 1, self.cameraViewlabels[combo.id_number].width(), self.cameraViewlabels[combo.id_number].height() )
+                    self.threads[combo.id_number].updateFrame.connect(self.setImages[combo.id_number])
+                    self.threads[combo.id_number].start()
             
-        else:
-            self.theLabel.remove(combo.id_number) 
-        print(f"Selected the variable {idx} from combo {combo.id_number}")
-        self.threads[combo.id_number].start()
+            elif idx == 0:
+                self.threads[combo.id_number].stop()
+                # Wait for 5 seconds
+                time.sleep(1)
+                print("removing pixmmap")
+                self.cameraViewlabels[combo.id_number].setStyleSheet(u"background-color: black;")
+                self.cameraViewlabels[combo.id_number].clear()
+                self.cameraViewlabels[combo.id_number].setPixmap(QPixmap())
+                self.theLabel.remove(combo.id_number)
+                
 
     @Slot(QImage)
-    def setImage(self, image):
-        for i in self.cameraViewlabels:
-            if i in self.theLabel:
-                self.cameraViewlabels[i].setPixmap(QPixmap.fromImage(image))
-            else:
-                pass
+    def setImage_0(self, image):
+        self.cameraViewlabels[0].setPixmap(QPixmap.fromImage(image))
+    @Slot(QImage)
+    def setImage_1(self, image):
+        self.cameraViewlabels[1].setPixmap(QPixmap.fromImage(image))
+    @Slot(QImage)
+    def setImage_2(self, image):
+        self.cameraViewlabels[2].setPixmap(QPixmap.fromImage(image))
+    @Slot(QImage)
+    def setImage_3(self, image):
+        self.cameraViewlabels[3].setPixmap(QPixmap.fromImage(image))
+    @Slot(QImage)
+    def setImage_4(self, image):
+        self.cameraViewlabels[4].setPixmap(QPixmap.fromImage(image))
+    @Slot(QImage)
+    def setImage_5(self, image):
+        self.cameraViewlabels[5].setPixmap(QPixmap.fromImage(image))
+    @Slot(QImage)
+    def setImage_6(self, image):
+        self.cameraViewlabels[6].setPixmap(QPixmap.fromImage(image))
+    @Slot(QImage)
+    def setImage_7(self, image):
+        self.cameraViewlabels[7].setPixmap(QPixmap.fromImage(image))
+    @Slot(QImage)
+    def setImage_8(self, image):
+        self.cameraViewlabels[8].setPixmap(QPixmap.fromImage(image))
+    @Slot(QImage)
+    def setImage_9(self, image):
+        self.cameraViewlabels[9].setPixmap(QPixmap.fromImage(image))
+          
                 # self.cameraViewlabels[i].setPixmap(None)
         # self.cameraViewLabel.setPixmap(QPixmap.fromImage(image))
 
@@ -310,10 +373,14 @@ class MainWindow(QMainWindow):
 class Thread(QThread):
     updateFrame = Signal(QImage)
    
-    def __init__(self, index) -> None:
+    def __init__(self, index, width, height) -> None:
         super(Thread, self).__init__()
        
         self.index = index
+        self.width = width
+        self.height = height
+        # print(self.height)
+        # print(self.width)
         self.__thread_active = True
 
     def run(self):
@@ -324,12 +391,14 @@ class Thread(QThread):
             if not ret:
                 continue
             h, w, ch = frame.shape
-            img = QImage(frame.data, w, h, ch * w, QImage.Format_RGB888)
-            scaled_img = img.scaled(640, 480, Qt.KeepAspectRatio)
+            color_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            img = QImage(color_frame.data, w, h, ch * w, QImage.Format_RGB888)
+            scaled_img = img.scaled(self.width, self.height, Qt.KeepAspectRatio)
             # Emit signal
             self.updateFrame.emit(scaled_img)
             if self.__thread_active == False:
                 break
+        self.cap.release()
         # sys.exit(-1)
     def stop(self):
         self.__thread_active = False
